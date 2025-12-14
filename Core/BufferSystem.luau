@@ -26,14 +26,14 @@ function BufferSystem.Consume(action: Action): boolean
 	end
 
 	local bufferId = action.ID .. "_buffer"
-	local time = BufferStates[bufferId]
-
-	if time and os.clock() < time then
+	local bufferTime = BufferStates[bufferId]
+	
+	if bufferTime and os.clock() < bufferTime then
 		BufferStates[bufferId] = nil
 		return true
 	end
 
-	if time then
+	if bufferTime then
 		BufferStates[bufferId] = nil
 	end
 
@@ -50,8 +50,8 @@ end
 
 function BufferSystem.CleanExpired()
 	local now = os.clock()
-	for id, time in BufferStates do
-		if time < now then
+	for id, bufferTime in BufferStates do
+		if bufferTime < now then
 			BufferStates[id] = nil
 		end
 	end
