@@ -41,101 +41,131 @@ wally install
 
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Arc = require(ReplicatedStorage.Packages.arclightinput)
+local Input = require(ReplicatedStorage.Packages.arclightinput)
 
--- Create an action registry
-local Actions = Arc.ActionRegistry.new()
+-- Register an action with priority 10
+local Attack = Input.Register("Attack", 10)
+    :Define(Enum.KeyCode.Q)
 
--- Register an action with priority
-Actions:register("Jump", {
-    priority = 10,
-    keys = { Enum.KeyCode.Space },
-    gamepad = { Enum.KeyCode.ButtonA }
-})
-
--- Listen for input events
-Actions:onBegan("Jump", function(context)
-    print("Jump started!", context.device, context.timestamp)
+-- Listen for the input
+Attack.OnBegan:Connect(function()
+    player:Attack()
 end)
 
-Actions:onEnded("Jump", function(context)
-    print("Jump ended!")
+Attack.OnEnded:Connect(function()
+    player:StopAttack()
 end)
 ```
 
-## Advanced Usage
+That's it. Priority 10 blocks anything below it automatically.
 
-### Input Buffering
+## Common Patterns
 
-Perfect for fighting games or precise input windows:
+### Enable Input Buffering
+
+Queue inputs during animations:
 
 ```lua
-local Buffer = Arc.BufferSystem.new(0.2) -- 200ms window
-
--- Record inputs
-Buffer:record("LightPunch")
-Buffer:record("HeavyPunch")
-
--- Check for sequences
-if Buffer:matches({"LightPunch", "HeavyPunch"}) then
-    print("Combo executed!")
-end
+Attack:EnableBuffer(0.3) -- 300ms window
 ```
 
-### Device Detection
+Now if the player presses Q while animating, it queues and fires when the animation ends.
+
+### Multiple Input Types
 
 ```lua
-local Detector = Arc.DeviceDetector.new()
+local Attack = Input.Register("Attack", 10)
+    :Define(Enum.KeyCode.Q)
+    :Define(Enum.UserInputType.Touch)
+```
 
-Detector:onDeviceChanged(function(device)
-    print("Switched to:", device) -- "Keyboard", "Gamepad", "Touch", etc.
+Keyboard and touch both trigger the same action.
+
+### Combo / Sequence Detection
+
+```lua
+local Ultimate = Input.Register("Ultimate", 9)
+    :DefineSequence({
+        Enum.KeyCode.Q,
+        Enum.KeyCode.W,
+        Enum.KeyCode.E
+    }, 1.0) -- 1 second window to complete sequence
+
+Ultimate.OnBegan:Connect(function()
+    player:executeUltimate()
 end)
-
-local currentDevice = Detector:getCurrentDevice()
 ```
 
-### UI Integration
+Automatically detects the Q-W-E pattern within 1 second.
+
+### UI Button Binding
 
 ```lua
-local UI = Arc.UIIntegration.new()
+local Shop = Input.Register("Shop", 8)
+    :Define(Enum.KeyCode.B)
+    :DefineUI(script.Parent.ShopButton)
 
--- Block game inputs when UI is focused
-UI:setUIFocused(true)
-
--- Check if inputs should be blocked
-if UI:shouldBlockInputs() then
-    -- Skip game input processing
-end
+Shop.OnBegan:Connect(function()
+    toggleShop()
+end)
 ```
+
+One action handles both keyboard (B key) and the button. Same priority system applies.
+
+### Runtime Remapping
+
+```lua
+-- In a keybind menu
+local reader = Input.ReadInput("BindAttack", 1, 5)
+reader:Connect(function(input)
+    Attack:Remap(input.KeyCode)
+    print("Attack rebound to", input.KeyCode)
+end)
+```
+
+Captures the next keypress and rebinds automatically.
+
+### Critical Priority (Always Works)
+
+```lua
+local Menu = Input.Register("Menu", Input.CRITICAL_PRIORITY)
+    :Define(Enum.KeyCode.Escape)
+
+Menu.OnBegan:Connect(function()
+    openMenu()
+end)
+```
+
+This action is never blocked, even when other inputs are disabled.
 
 ## API Reference
 
-### ActionRegistry
+### Input (Main Module)
 
-| Method | Description |
-|--------|-------------|
-| `new()` | Create a new action registry |
-| `:register(name, config)` | Register a new action with keys and priority |
-| `:onBegan(name, callback)` | Listen for action start |
-| `:onEnded(name, callback)` | Listen for action end |
-| `:unregister(name)` | Remove an action |
+| Function | Description |
+|----------|-------------|
+| `Input.Register(name, priority)` | Register a new action, returns Action object |
+| `Input.ReadInput(name, maxPresses, timeout)` | Capture next N keypresses within timeout (returns Signal) |
+| `Input.GetDevice()` | Get current device type ("PC", "Mobile", "GamePad", "Console") |
+| `Input.GetTelemetry()` | Get stats: totalInputs, droppedInputs, activeActions |
+| `Input.CRITICAL_PRIORITY` | Constant for actions that cannot be blocked |
 
-### BufferSystem
+### Action (returned from Input.Register)
 
-| Method | Description |
-|--------|-------------|
-| `new(windowSeconds)` | Create buffer with time window |
-| `:record(actionName)` | Record an input to the buffer |
-| `:matches(sequence)` | Check if buffer matches a sequence |
-| `:clear()` | Clear the buffer |
-
-### DeviceDetector
-
-| Method | Description |
-|--------|-------------|
-| `new()` | Create device detector |
-| `:getCurrentDevice()` | Get current input device |
-| `:onDeviceChanged(callback)` | Listen for device switches |
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `:Define(input)` | self | Add a keybind (Enum.KeyCode or Enum.UserInputType) |
+| `:DefineSequence(inputs, window)` | self | Set up combo/sequence detection with time window |
+| `:DefineUI(guiObject)` | self | Bind a UI button to this action |
+| `:EnableBuffer(duration)` | self | Queue inputs for X seconds during locks |
+| `:Undefine(input)` | self | Remove a keybind |
+| `:UndefineUI()` | self | Remove UI binding |
+| `:Remap(input)` | self | Change keybind at runtime |
+| `:Enable()` | self | Re-enable the action |
+| `:Disable()` | - | Disable the action temporarily |
+| `:Destroy()` | - | Cleanup and remove the action |
+| `.OnBegan` | Signal | Fires when input begins |
+| `.OnEnded` | Signal | Fires when input ends |
 
 ## Project Structure
 
