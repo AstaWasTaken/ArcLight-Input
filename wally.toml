@@ -1,0 +1,8 @@
+[package]
+name = "nontkph/arclightinput"
+version = "1.0.6"
+description = "ArcLightInput - Full-stack gameplay input manager with priority blocking, buffering, combos, UI integration, and remap."
+license = "MIT"
+authors = ["nontkph_40404"]
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"

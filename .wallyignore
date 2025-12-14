@@ -1,0 +1,7 @@
+README.md
+LICENSE
+default.project.json
+.gitignore
+.git/
+wally.lock
+Packages/
