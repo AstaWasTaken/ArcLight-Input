@@ -82,7 +82,6 @@ function InputProcessor.HandleBegin(action: Action, input: InputObject, sorted)
 	InputProcessor.BlockLower(action, sorted)
 end
 
-
 function InputProcessor.HandleEnd(action: Action, input: InputObject, sorted)
 	if not ActiveStates[action.ID] then
 		return
@@ -95,10 +94,7 @@ function InputProcessor.HandleEnd(action: Action, input: InputObject, sorted)
 	ActiveStates[action.ID] = false
 	action.OnEnded:Fire(input)
 
-	-- 2. DISABLE Auto-Consume on KeyUp
-	-- ConsumeBuffer controlled by user via Attack:ConsumeBuffer() , not the KeyUp event.
-
-	--[[ 
+	-- Auto-consume buffered input on key-up and re-fire if allowed
 	if BufferSystem.Consume(action) then
 		BufferSystem.SetProcessing(action.ID, true)
 		task.defer(function()
@@ -106,15 +102,15 @@ function InputProcessor.HandleEnd(action: Action, input: InputObject, sorted)
 			if action.Enabled and not BlockedStates[action.ID] and not ActiveStates[action.ID] then
 				ActiveStates[action.ID] = true
 				action.OnBegan:Fire(input)
+				InputProcessor.BlockLower(action, sorted)
+			else
+				-- No replay; unblock lower actions so nothing stays stuck
+				InputProcessor.UnblockLower(action, sorted)
 			end
 		end)
 	else
 		InputProcessor.UnblockLower(action, sorted)
 	end
-	--]]
-
-	-- Ensure we still unblock lower priority actions
-	InputProcessor.UnblockLower(action, sorted)
 end
 
 function InputProcessor.ClearState(actionId: string)

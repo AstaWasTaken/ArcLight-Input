@@ -23,6 +23,7 @@ export type Action = {
 	Enable: (self: Action) -> Action,
 	Disable: (self: Action) -> Action,
 	EnableBuffer: (self: Action, Duration: number?) -> Action,
+	ConsumeBuffer: (self: Action) -> boolean,
 	GetBufferedInput: (self: Action) -> boolean,
 	Destroy: (self: Action) -> (),
 }

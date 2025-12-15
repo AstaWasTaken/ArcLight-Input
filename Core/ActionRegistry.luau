@@ -117,6 +117,11 @@ function ActionMeta:ConsumeBuffer()
 	return BufferSystem.Consume(self)
 end
 
+function ActionMeta:GetBufferedInput()
+	-- Alias for clarity; returns true if a buffered input was consumed
+	return BufferSystem.Consume(self)
+end
+
 function ActionMeta:Destroy()
 	if self.Cleaner then
 		Telemetry.activeActions -= 1

@@ -69,7 +69,10 @@ Queue inputs during animations:
 Attack:EnableBuffer(0.3) -- 300ms window
 ```
 
-Now if the player presses Q while animating, it queues and fires when the animation ends.
+Behavior:
+- Press during a lock/animation → buffered.
+- On key-up, the buffer auto re-fires once the action is unblocked/enabled.
+- If you need manual control, call `Attack:ConsumeBuffer()` / `Attack:GetBufferedInput()`.
 
 ### Multiple Input Types
 
