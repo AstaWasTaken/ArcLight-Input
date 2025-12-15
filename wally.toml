@@ -6,4 +6,4 @@ license = "MIT"
 authors = ["nontkph_40404"]
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
-exclude = ["CHANGELOG.md", "RELEASE_NOTES.md", ".gitignore"]
+include = ["Core", "init.luau", "Package"]
