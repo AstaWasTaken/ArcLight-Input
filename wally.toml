@@ -6,8 +6,4 @@ license = "MIT"
 authors = ["nontkph_40404"]
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
-
-[package.exclude]
-"CHANGELOG.md" = true
-"RELEASE_NOTES.md" = true
-".gitignore" = true
+exclude = ["CHANGELOG.md", "RELEASE_NOTES.md", ".gitignore"]
