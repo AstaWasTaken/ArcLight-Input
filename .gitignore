@@ -10,6 +10,10 @@ node_modules/
 .idea/
 *.sublime-workspace
 
+# Local release note drafts (do not commit)
+RELEASE_NOTES.md
+release_notes.md
+
 # OS
 .DS_Store
 Thumbs.db

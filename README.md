@@ -71,8 +71,38 @@ Attack:EnableBuffer(0.3) -- 300ms window
 
 Behavior:
 - Press during a lock/animation → buffered.
-- On key-up, the buffer auto re-fires once the action is unblocked/enabled.
+- On key-up, the buffer auto re-fires once the action is unblocked/enabled (no extra calls).
 - If you need manual control, call `Attack:ConsumeBuffer()` / `Attack:GetBufferedInput()`.
+
+Real gameplay flow (auto replay):
+
+```lua
+local Attack = Input.Register("Attack", 10)
+    :Define(Enum.KeyCode.Q)
+    :EnableBuffer(0.35)
+
+-- Enter an animation lock: disable to block immediate fire
+Attack:Disable()
+task.delay(0.2, function()
+    Attack:Enable() -- when the player releases Q, the buffered press re-fires automatically
+end)
+
+Attack.OnBegan:Connect(function()
+    player:Attack()
+end)
+
+Attack.OnEnded:Connect(function()
+    player:StopAttack()
+end)
+```
+
+Manual control example (only replay when you decide):
+
+```lua
+if Attack:ConsumeBuffer() then
+    Attack.OnBegan:Fire() -- optional manual replay hook
+end
+```
 
 ### Multiple Input Types
 
