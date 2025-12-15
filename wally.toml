@@ -1,6 +1,6 @@
 [package]
 name = "nontkph/arclightinput"
-version = "1.0.8"
+version = "1.0.9"
 description = "ArcLightInput - Full-stack gameplay input manager with priority blocking, buffering, combos, UI integration, and remap."
 license = "MIT"
 authors = ["nontkph_40404"]
