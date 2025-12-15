@@ -113,6 +113,10 @@ function ActionMeta:EnableBuffer(Duration: number?)
 	return self
 end
 
+function ActionMeta:ConsumeBuffer()
+	return BufferSystem.Consume(self)
+end
+
 function ActionMeta:Destroy()
 	if self.Cleaner then
 		Telemetry.activeActions -= 1
